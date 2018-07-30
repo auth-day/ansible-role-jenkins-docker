@@ -1,0 +1,7 @@
+docker_image: jenkins/jenkins:lts
+docker_container_name: jenkins-docker
+shell: /bin/bash
+name: jenkins
+jenkins_home: jenkins
+docker_volumes_path: /var/lib/docker/volumes
+secret_place: "{{ docker_volumes_path }}/{{ jenkins_home }}/_data/secrets/initialAdminPassword"

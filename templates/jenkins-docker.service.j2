@@ -1,0 +1,20 @@
+[Unit]
+Description=Jenkins in docker container
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+ExecStartPre=/bin/sleep 2
+#ExecStartPre=/usr/bin/docker kill {{ docker_container_name }}
+#ExecStartPre=/usr/bin/docker rm -f {{ docker_container_name }}
+ExecStart=/usr/bin/docker run --name {{ docker_container_name }} -p 8080:8080 -p 50000:50000 \
+        -v /home/{{ user_name_1000.stdout }}/.ssh:/var/jenkins_home/.ssh \
+	-v {{ jenkins_home }}:/var/jenkins_home {{ docker_image }}
+
+ExecStop=/usr/bin/docker stop {{ docker_container_name }}
+ExecStopPost=/usr/bin/docker rm -f {{ docker_container_name }}
+ExecReload=/usr/bin/docker restart {{ docker_container_name }}
+
+[install]
+WantedBy=default.target

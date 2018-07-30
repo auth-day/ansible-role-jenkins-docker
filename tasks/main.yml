@@ -1,0 +1,50 @@
+---
+
+- name: which user has 1000 UID
+  shell: 'grep 1000 /etc/passwd | cut -d: -f1'
+  register: user_name_1000
+ 
+- name: create user jenkins
+  user: name=jenkins shell={{ shell }} state=present generate_ssh_key=yes uid=1000
+  when: user_name_1000.stdout == ""
+
+- name: create volume for sharing jenkins home dir 
+  docker_volume: name={{ jenkins_home }}
+
+- name: Pull {{ docker_image }}
+  docker_image: name={{ docker_image }}
+
+- name: copy systemd unit for jenkins-docker.service
+  template: src=jenkins-docker.service.j2 dest=/etc/systemd/system/jenkins-docker.service
+
+- name: reload systemd
+  shell: systemctl daemon-reload
+
+- name: start and enable jenkins-docker.service
+  service: name=jenkins-docker state=restarted enabled=yes
+
+- name: save public key to variable 
+  slurp: src=/home/jenkins/.ssh/id_rsa.pub
+  register: key
+  when: user_name_1000.stdout == ""
+
+- name: save public key to var from 1000 user 
+  slurp: src=/home/{{ user_name_1000.stdout }}/.ssh/id_rsa.pub
+  register: key
+  when: user_name_1000.stdout != ""
+
+- set_fact: key="{{ key.content | b64decode }}"
+
+- name: copy this key
+  debug: msg="{{ key }} , and distribute it on the nodes. User this role for example https://github.com/diboanches/ansible-role-user-management"
+
+- name: sleep for 15 seconds for secret init
+  shell: sleep 15
+
+- name: going after initialPassword
+  slurp: src={{ secret_place }} 
+  register: initialPass
+
+- name: and here is initialPassword
+  debug: msg="{{ initialPass.content | b64decode }} , paste it to UI initial setup"
+
