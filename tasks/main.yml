@@ -42,7 +42,7 @@
 - set_fact: key="{{ key.content | b64decode }}"
 
 - name: copy this key
-  debug: msg="{{ key }} , and distribute it on the nodes. User this role for example https://github.com/diboanches/ansible-role-user-management"
+  debug: msg="{{ key }} , and distribute it on the nodes. Use this role for example https://github.com/diboanches/ansible-role-user-management"
 
 - name: sleep for 30 seconds for secret init
   shell: sleep 30
