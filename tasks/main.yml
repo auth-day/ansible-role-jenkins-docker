@@ -1,4 +1,9 @@
 ---
+- name: install python-pip
+  package: name=python-pip state=latest
+
+- name: isntall docker-py
+  pip: name=docker-py state=latest
 
 - name: which user has 1000 UID
   shell: 'grep 1000 /etc/passwd | cut -d: -f1'
@@ -38,8 +43,8 @@
 - name: copy this key
   debug: msg="{{ key }} , and distribute it on the nodes. User this role for example https://github.com/diboanches/ansible-role-user-management"
 
-- name: sleep for 15 seconds for secret init
-  shell: sleep 15
+- name: sleep for 30 seconds for secret init
+  shell: sleep 30
 
 - name: going after initialPassword
   slurp: src={{ secret_place }} 
