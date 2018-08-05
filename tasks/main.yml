@@ -8,8 +8,11 @@
 - name: which user has 1000 UID
   shell: 'grep 1000 /etc/passwd | cut -d: -f1'
   register: user_name_1000
+
+### if no user found - "" will be saved in var
+### then jenkins user will be created
  
-- name: create user jenkins
+- name: create user jenkins if no 1000 UID user
   user: name=jenkins shell={{ shell }} state=present generate_ssh_key=yes uid=1000
   when: user_name_1000.stdout == ""
 
@@ -29,20 +32,27 @@
 - name: start and enable jenkins-docker.service
   service: name=jenkins-docker state=restarted enabled=yes
 
-- name: save public key to variable 
+- name: save public key to variable for Jenkins user
   slurp: src=/home/jenkins/.ssh/id_rsa.pub
   register: key
   when: user_name_1000.stdout == ""
 
-- name: save public key to var from 1000 user 
+- name: check if file exists 
+  stat: path=/home/{{ user_name_1000.stdout }}/.ssh/id_rsa.pub
+  register: file
+
+- name: save public key to var from {{ user_name_1000.stdout }} user 
   slurp: src=/home/{{ user_name_1000.stdout }}/.ssh/id_rsa.pub
   register: key
-  when: user_name_1000.stdout != ""
+  when: file.stat.exists == True
 
-- set_fact: key="{{ key.content | b64decode }}"
+- name: if user has no ssh key 
+  debug: msg=" ************ you need to create ssh keys for {{ user_name_1000.stdout }} **************"
+  when: file.stat.exists == False
 
 - name: copy this key
-  debug: msg="{{ key }} , and distribute it on the nodes. Use this role for example https://github.com/diboanches/ansible-role-user-management"
+  debug: msg="{{ key.content | b64decode }} , and distribute it on the nodes. Use this role for example https://github.com/diboanches/ansible-role-user-management"
+  when: file.stat.exists == True
 
 - name: sleep for 30 seconds for secret init
   shell: sleep 30

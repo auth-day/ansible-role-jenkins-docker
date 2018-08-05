@@ -5,3 +5,6 @@ name: jenkins
 jenkins_home: jenkins
 docker_volumes_path: /var/lib/docker/volumes
 secret_place: "{{ docker_volumes_path }}/{{ jenkins_home }}/_data/secrets/initialAdminPassword"
+
+## Generate ssh keys if not exists? 
+generete_ssh_key: yes
