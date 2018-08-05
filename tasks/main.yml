@@ -21,6 +21,7 @@
 
 - name: copy systemd unit for jenkins-docker.service
   template: src=jenkins-docker.service.j2 dest=/etc/systemd/system/jenkins-docker.service
+  notify: systemctl daemon-reload
 
 - name: reload systemd
   shell: systemctl daemon-reload
@@ -52,4 +53,7 @@
 
 - name: and here is initialPassword
   debug: msg="{{ initialPass.content | b64decode }} , paste it to UI initial setup"
+
+#- name: install workflow-agregator plugin
+#  shell: java -jar /var/lib/docker/volumes/jenkins/_data/war/WEB-INF/jenkins-cli.jar -s http://localhost:8080 -auth admin:{{ initialPass.content | b64decode }}   install-plugin workflow-aggregator
 
